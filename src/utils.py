@@ -3,9 +3,12 @@ import csv
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+from schemas import TestCase
 
 def save_raw_response(case_id: str, prompt_version: str, text: str) -> str:
-    """Сохраняет сырой ответ модели в outputs/raw_responses/"""
+    """
+    Сохраняет сырой ответ модели в outputs/raw_responses/
+    """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{case_id}_v{prompt_version}_{timestamp}.txt"
     path = Path("outputs/raw_responses") / filename
@@ -14,11 +17,15 @@ def save_raw_response(case_id: str, prompt_version: str, text: str) -> str:
     return str(path)
 
 def count_questions(text: str) -> int:
-    """Подсчитывает количество вопросов в ответе модели"""
+    """
+    Подсчитывает количество вопросов в ответе модели
+    """
     return len(re.findall(r"^\s*\d+\)", text, flags=re.M))
 
 def save_summary_csv(rows: List[Dict]) -> str:
-    """Сохраняет агрегированные результаты в CSV"""
+    """
+    Сохраняет агрегированные результаты в CSV
+    """
     path = Path("outputs/summaries/results.csv")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -29,7 +36,9 @@ def save_summary_csv(rows: List[Dict]) -> str:
     return str(path)
 
 def build_prompt(tc: TestCase, prompt_template: str) -> str:
-    """Формирует полный промпт из шаблона и параметров теста"""
+    """
+    Формирует полный промпт из шаблона и параметров теста
+    """
     return prompt_template.format(
         gender=tc.gender,
         age=tc.age,

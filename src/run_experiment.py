@@ -2,7 +2,7 @@
 """
 Основной скрипт для запуска экспериментов по prompt engineering с GigaChat.
 """
-import os
+
 from datetime import datetime
 from dotenv import load_dotenv
 from prompt_templates import PROMPT_V1
@@ -20,8 +20,8 @@ test_cases = [
         age=21,
         personal_topics=["музыка", "фильмы", "спорт", "друзья", "семья"],
         forbidden_topics=["политика", "войны", "экономика"],
-        topic_count=5,
-        questions_per_topic=4,
+        topic_count=10,
+        questions_per_topic=5,
     ),
     TestCase(
         case_id="002",

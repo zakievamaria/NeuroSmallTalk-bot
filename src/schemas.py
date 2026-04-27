@@ -3,6 +3,7 @@ from typing import List
 
 @dataclass
 class TestCase:
+    case_id: str
     gender: str
     age: int
     personal_topics: List[str]
