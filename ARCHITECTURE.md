@@ -1,4 +1,6 @@
 # NeuroSmallTalk-bot
+## The structure
+```
 NeuroSmallTalk-Bot/
 ├── src/
 │   ├── run_experiment.py
@@ -24,3 +26,4 @@ NeuroSmallTalk-Bot/
 ├── requirements.txt
 ├── .env.example
 └── .gitignore
+```
