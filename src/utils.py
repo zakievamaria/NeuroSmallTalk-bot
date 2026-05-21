@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import List, Dict
 from schemas import TestCase
 
+PROJECT_ROOT = Path(__file__).parent.parent
+EXPERIMENTS_PATH = PROJECT_ROOT / "experiments"
+
 def save_raw_response(case_id: str, prompt_version: str, text: str) -> str:
     """
     Сохраняет сырой ответ модели в outputs/raw_responses/
@@ -20,7 +23,26 @@ def count_questions(text: str) -> int:
     """
     Подсчитывает количество вопросов в ответе модели
     """
-    return len(re.findall(r"^\s*\d+\)", text, flags=re.M))
+    match = re.search(
+        r"ЭТАП 3: Список вопросов(.*?)(ЭТАП 4: Самопроверка)",
+        text,
+        flags=re.S
+    )
+
+    if not match:
+        return 0
+
+    questions_block = match.group(1)
+
+    pattern = r"^\s*\d+\)\s+.*[?.]\s*$"
+
+    count = 0
+
+    for line in questions_block.splitlines():
+        if re.match(pattern, line):
+            count += 1
+
+    return count
 
 def save_summary_csv(rows: List[Dict]) -> str:
     """
@@ -28,11 +50,21 @@ def save_summary_csv(rows: List[Dict]) -> str:
     """
     path = Path("outputs/summaries/results.csv")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
-        if rows:
-            writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+
+    if not rows:
+        return str(path)
+
+    file_exists = path.exists() and path.stat().st_size > 0
+    fieldnames = list(rows[0].keys())
+
+    with path.open("a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+
+        if not file_exists:
             writer.writeheader()
-            writer.writerows(rows)
+
+        writer.writerows(rows)
+
     return str(path)
 
 def build_prompt(tc: TestCase, prompt_template: str) -> str:

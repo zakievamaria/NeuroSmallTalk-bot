@@ -4,34 +4,27 @@
 """
 
 from datetime import datetime
+
+import json
 from dotenv import load_dotenv
 from prompt_templates import PROMPT_V1
 from schemas import TestCase
-from utils import save_raw_response, count_questions, save_summary_csv, build_prompt
+from utils import build_prompt, count_questions, EXPERIMENTS_PATH, save_raw_response, save_summary_csv
 from gigachat_client import get_client
 
 load_dotenv()
 
-# Тестовые кейсы
+with open(EXPERIMENTS_PATH / "test_cases.json", "r", encoding='utf-8') as file_to_read:
+    cases = json.load(file_to_read)
+
 test_cases = [
-    TestCase(
-        case_id="001",
-        gender="ж",
-        age=21,
-        personal_topics=["музыка", "фильмы", "спорт", "друзья", "семья"],
-        forbidden_topics=["политика", "войны", "экономика"],
-        topic_count=10,
-        questions_per_topic=5,
-    ),
-    TestCase(
-        case_id="002",
-        gender="м",
-        age=45,
-        personal_topics=["рыбалка", "автомобили", "работа", "дом", "путешествия"],
-        forbidden_topics=["болезни", "конфликты", "финансы"],
-        topic_count=5,
-        questions_per_topic=4,
-    ),
+    TestCase(**cases["case_1"]),
+    TestCase(**cases["case_2"]),
+    TestCase(**cases["case_3"]),
+    TestCase(**cases["case_4"]),
+    TestCase(**cases["case_5"]),
+    TestCase(**cases["case_6"]),
+    TestCase(**cases["case_7"])
 ]
 
 rows = []
@@ -47,10 +40,8 @@ with get_client() as giga:
         response = giga.chat(prompt)
         output = response.choices[0].message.content
 
-        # Сохраняем сырой ответ
         raw_path = save_raw_response(tc.case_id, prompt_version, output)
 
-        # Подсчитываем метрики
         questions_count = count_questions(output)
 
         row = {
@@ -61,7 +52,7 @@ with get_client() as giga:
             "topic_count": tc.topic_count,
             "questions_per_topic": tc.questions_per_topic,
             "output_questions_count": questions_count,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat()
         }
         rows.append(row)
 
@@ -69,6 +60,3 @@ with get_client() as giga:
 
 # Сохраняем сводку
 summary_path = save_summary_csv(rows)
-print(f"\nЭксперимент завершён!")
-print(f"Сырые ответы: outputs/raw_responses/")
-print(f"Сводка: {summary_path}")
